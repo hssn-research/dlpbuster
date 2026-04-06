@@ -1,0 +1,125 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace/dlpbuster"],
+      "description": "Read/write access to the dlpbuster project directory",
+      "permissions": ["read", "write", "create", "delete"],
+      "roots": ["/workspace/dlpbuster"]
+    },
+
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub integration — create repos, issues, PRs, manage branches",
+      "capabilities": [
+        "repo.read",
+        "repo.write",
+        "issues.read",
+        "issues.write",
+        "pull_requests.read",
+        "pull_requests.write"
+      ]
+    },
+
+    "shell": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-shell"],
+      "description": "Execute shell commands — go build, go test, go vet, gofmt, goreleaser",
+      "allowed_commands": [
+        "go",
+        "gofmt",
+        "goimports",
+        "goreleaser",
+        "make",
+        "git",
+        "curl",
+        "cat",
+        "ls",
+        "mkdir",
+        "mv",
+        "cp",
+        "rm"
+      ],
+      "working_directory": "/workspace/dlpbuster",
+      "timeout_seconds": 120
+    },
+
+    "web-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Web search — look up Go packages, CVEs, DLP bypass techniques, security research"
+    },
+
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "description": "Fetch URLs — read Go documentation, pkg.go.dev pages, GitHub raw files, RFCs",
+      "allowed_domains": [
+        "pkg.go.dev",
+        "go.dev",
+        "github.com",
+        "raw.githubusercontent.com",
+        "datatracker.ietf.org",
+        "docs.aws.amazon.com",
+        "cloud.google.com",
+        "learn.microsoft.com"
+      ]
+    },
+
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory — store design decisions, open questions, known issues across sessions",
+      "namespaces": [
+        "architecture-decisions",
+        "channel-status",
+        "open-bugs",
+        "deferred-features"
+      ]
+    }
+  },
+
+  "agentConfig": {
+    "projectName": "dlpbuster",
+    "language": "go",
+    "goVersion": "1.22",
+    "workingDirectory": "/workspace/dlpbuster",
+    "buildCommand": "make build",
+    "testCommand": "make test",
+    "lintCommand": "make lint",
+    "mainEntrypoint": "cmd/dlpbuster/main.go",
+
+    "toolPriority": [
+      "filesystem",
+      "shell",
+      "github",
+      "fetch",
+      "web-search",
+      "memory"
+    ],
+
+    "sessionRules": [
+      "Always read agent-instructions.md at the start of each session before writing any code",
+      "Always run `go vet ./...` and `gofmt -l .` before committing",
+      "Never commit directly to main — create a feature branch per TODO item",
+      "Store all design decisions in the memory server under architecture-decisions namespace",
+      "After completing a TODO item, mark it done in TODO.md via filesystem tool",
+      "Run tests after every code change: `go test ./... -race -timeout 30s`"
+    ],
+
+    "contextFiles": [
+      "agent-instructions.md",
+      "TODO.md",
+      "project-structure.md",
+      "go.mod",
+      "Makefile"
+    ]
+  }
+}
